@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Validation encadreurs - Zãmsɛ{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h1 class="h2 fw-bold mb-1">Validation des encadreurs</h1><p class="text-muted">Vérifiez et validez les nouveaux encadreurs</p></div>
+    <a href="{% url 'admin_app:dashboard' %}" class="btn btn-outline-secondary rounded-pill"><i class="bi bi-arrow-left me-2"></i>Retour</a>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+      {% if encadreurs %}
+      <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="bg-light"><tr><th>Photo</th><th>Nom complet</th><th>Email</th><th>Ville</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody>
+        {% for e in encadreurs %}
+        <tr>
+          <td>{% if e.utilisateur.photo_profil %}<img src="{{ e.utilisateur.photo_profil.url }}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">{% else %}<div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;"><i class="bi bi-person-circle text-secondary"></i></div>{% endif %}</td>
+          <td class="fw-semibold">{{ e.utilisateur.get_full_name }}</td>
+          <td>{{ e.utilisateur.email }}</td>
+          <td>{{ e.ville|default:"-" }}</td>
+          <td class="small">{{ e.date_inscription|date:"d/m/Y" }}</td>
+          <td>{% if e.utilisateur.est_verifie %}<span class="badge bg-success">Validé</span>{% else %}<span class="badge bg-warning">En attente</span>{% endif %}</td>
+          <td><a href="{% url 'admin_app:detail_encadreur' e.id %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-eye me-1"></i>Voir</a></td>
+        </tr>{% endfor %}
+      </tbody></table></div>
+      {% else %}<div class="text-center py-5"><i class="bi bi-check-circle fs-1 text-success"></i><p class="text-muted mt-2">Aucun encadreur en attente</p></div>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

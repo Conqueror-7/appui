@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détail encadreur - Zãmsɛ{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-card { background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #eef2ff; }
+  .profile-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid #e3b23c; }
+  .avatar-placeholder { width: 100px; height: 100px; background: linear-gradient(135deg, #0f2b4b, #1e3a5f); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 600; border: 4px solid #e3b23c; }
+  .status-badge { padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; }
+  .status-pending { background: #fef3c7; color: #d97706; }
+  .status-validated { background: #d1fae5; color: #059669; }
+  .document-card { background: #f8fafc; border-radius: 16px; padding: 1rem; transition: all 0.2s; border: 1px solid #eef2ff; height: 100%; }
+  .document-card:hover { background: #fef9e6; border-color: #e3b23c; }
+  .btn-doc { padding: 0.25rem 0.6rem; font-size: 0.7rem; border-radius: 30px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="{% url 'admin_app:validation_encadreurs' %}" class="btn btn-outline-secondary rounded-pill"><i class="bi bi-arrow-left me-2"></i>Retour</a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'admin_app:valider_encadreur' encadreur.id %}" class="btn btn-success rounded-pill px-4"><i class="bi bi-check-circle me-2"></i>Valider</a>
+      <button class="btn btn-outline-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#refuserModal"><i class="bi bi-x-circle me-2"></i>Refuser</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="profile-card text-center">
+        {% if encadreur.utilisateur.photo_profil %}
+          <img src="{{ encadreur.utilisateur.photo_profil.url }}" class="profile-avatar">
+        {% else %}
+          <div class="avatar-placeholder mx-auto">{{ encadreur.utilisateur.get_full_name|make_list|first|upper }}</div>
+        {% endif %}
+        <h2 class="fw-bold mt-3">{{ encadreur.utilisateur.get_full_name }}</h2>
+        <p class="text-muted">@{{ encadreur.utilisateur.username }}</p>
+        <div class="mb-3">
+          {% if encadreur.utilisateur.est_verifie %}
+            <span class="status-badge status-validated">✓ Compte validé</span>
+          {% else %}
+            <span class="status-badge status-pending">⏳ En attente de validation</span>
+          {% endif %}
+        </div>
+        <hr>
+        <div class="text-start">
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Email</span><span>{{ encadreur.utilisateur.email }}</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Téléphone</span><span>{{ encadreur.utilisateur.telephone|default:"-" }}</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Genre</span><span>{{ encadreur.get_genre_display }}</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Ville</span><span>{{ encadreur.ville }}{% if encadreur.quartier %} ({{ encadreur.quartier }}){% endif %}</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Inscription</span><span>{{ encadreur.date_inscription|date:"d/m/Y H:i" }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="profile-card">
+        <h4 class="fw-bold mb-3"><i class="bi bi-person-badge me-2"></i>Présentation</h4>
+        <p>{{ encadreur.presentation|default:"Aucune présentation" }}</p>
+      </div>
+
+      <!-- Documents -->
+      <div class="profile-card">
+        <h4 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Documents</h4>
+        <div class="row g-3">
+          {% if documents %}
+            {% for doc in documents %}
+            <div class="col-md-4">
+              <div class="document-card text-center">
+                {% if "pdf" in doc.fichier.url %}
+                  <i class="bi bi-file-pdf fs-1 text-danger"></i>
+                {% else %}
+                  <i class="bi bi-file-image fs-1 text-primary"></i>
+                {% endif %}
+                <div class="fw-semibold mt-2">{{ doc.get_type_document_display }}</div>
+                <div class="small text-muted">{{ doc.date_upload|date:"d/m/Y" }}</div>
+                <div class="mt-2">
+                  <a href="{{ doc.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill btn-doc">
+                    <i class="bi bi-eye me-1"></i>Voir
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="col-12">
+              <p class="text-muted text-center py-3">Aucun document disponible</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <a href="{% url 'admin_app:valider_encadreur' encadreur.id %}" class="btn btn-success w-100 py-2 rounded-pill">
+              <i class="bi bi-check-circle me-2"></i>Valider cet encadreur
+            </a>
+          </div>
+          <div class="col-md-6">
+            <button class="btn btn-outline-danger w-100 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#refuserModal">
+              <i class="bi bi-x-circle me-2"></i>Refuser
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Refus -->
+<div class="modal fade" id="refuserModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="fw-bold">Refuser l'encadreur</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'admin_app:refuser_encadreur' encadreur.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p>Motif du refus :</p>
+          <textarea name="motif" class="form-control" rows="3" placeholder="Expliquez la raison du refus..." required></textarea>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-danger rounded-pill px-4">Confirmer le refus</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

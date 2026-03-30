@@ -1,0 +1,461 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Zãmsɛ</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, #0f2b4b 0%, #0a1e35 100%);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .logo { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; }
+    .logo img { height: 40px; width: auto; }
+    .logo-text { font-weight: 700; font-size: 1.2rem; color: white; }
+    .logo-text span { color: #e3b23c; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.7rem 1.2rem;
+      margin: 0.3rem 1.2rem;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+    .nav-item i { width: 24px; font-size: 1.1rem; }
+    .nav-badge {
+      margin-left: auto;
+      background: #e3b23c;
+      color: #0f2b4b;
+      padding: 0.125rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    /* Main */
+    .main { margin-left: 280px; min-height: 100vh; background: #f8fafc; }
+    .top-bar {
+      background: white;
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+    .page-title h1 { font-size: 1.2rem; font-weight: 700; margin: 0; color: #0f2b4b; }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+      padding: 0.4rem 0.8rem;
+      border-radius: 40px;
+    }
+    .user-info:hover { background: #f1f5f9; }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e3b23c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+    .dropdown-menu-custom {
+      position: absolute;
+      top: 50px;
+      right: 2rem;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      min-width: 200px;
+      display: none;
+      z-index: 100;
+    }
+    .dropdown-menu-custom.show { display: block; }
+    .dropdown-item {
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    /* Notifications */
+    .notification-icon {
+      position: relative;
+      cursor: pointer;
+      margin-right: 1rem;
+    }
+    .notification-icon i { font-size: 1.2rem; color: #64748b; }
+    .notification-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.125rem 0.375rem;
+      border-radius: 50%;
+    }
+    .notifications-dropdown {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      min-width: 280px;
+      max-width: 320px;
+      display: none;
+      z-index: 100;
+    }
+    .notifications-dropdown.show { display: block; }
+    .notification-item {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #eef2ff;
+      cursor: pointer;
+    }
+    .notification-item:hover { background: #fef9e6; }
+    .notification-title { font-weight: 600; font-size: 0.8rem; margin-bottom: 0.2rem; }
+    .notification-time { font-size: 0.65rem; color: #94a3b8; }
+
+    /* Content */
+    .content { padding: 1.8rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 1.8rem; }
+    .stat-card {
+      background: white;
+      border-radius: 20px;
+      padding: 1rem 1.2rem;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .stat-card:hover { transform: translateY(-3px); border-color: #e3b23c; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+    .stat-value { font-size: 1.6rem; font-weight: 800; color: #0f2b4b; }
+    .stat-label { font-size: 0.7rem; color: #64748b; }
+
+    .card-modern {
+      background: white;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-header h3 { font-size: 0.95rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+    .card-body { padding: 0.8rem 1.2rem; }
+
+    .item-list {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .badge-status { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.65rem; font-weight: 600; }
+    .badge-pending { background: #fef3c7; color: #d97706; }
+    .badge-accepted { background: #d1fae5; color: #059669; }
+    .badge-validated { background: #d1fae5; color: #059669; }
+    .badge-danger { background: #fee2e2; color: #dc2626; }
+
+    .welcome-banner {
+      background: linear-gradient(135deg, #0f2b4b, #1e3a5f);
+      border-radius: 20px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+    .welcome-banner h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .alert-warning-custom { background: #fff3e0; border-left: 4px solid #e3b23c; padding: 0.8rem 1rem; border-radius: 12px; margin-bottom: 1rem; }
+    .btn-sm { padding: 0.2rem 0.7rem; font-size: 0.7rem; border-radius: 30px; }
+    .avatar-sm {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .avatar-placeholder-sm {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0f2b4b, #1e3a5f);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    @media (max-width: 992px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .content { padding: 1rem; } }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header text-center">
+    <a href="/dashboard/" class="logo d-block">
+      <img src="{% static 'images/logo.png' %}" alt="Zãmsɛ" style="height: 50px;">
+    </a>
+  </div>
+  <div>
+    <a href="/dashboard/" class="nav-item active"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+
+    {% if user.role == 'APPRENANT' %}
+      <a href="{% url 'recherche' %}" class="nav-item"><i class="bi bi-search"></i> Rechercher</a>
+      <a href="#" class="nav-item"><i class="bi bi-chat-dots"></i> Messages</a>
+    {% elif user.role == 'ENCADREUR' and user.est_verifie %}
+      <a href="{% url 'gerer_specialisations' %}" class="nav-item"><i class="bi bi-book"></i> Mes matières</a>
+      <a href="#" class="nav-item"><i class="bi bi-calendar"></i> Disponibilités</a>
+    {% elif user.role == 'ADMIN' %}
+      <a href="{% url 'admin_app:validation_encadreurs' %}" class="nav-item"><i class="bi bi-person-check"></i> Validation</a>
+      <a href="{% url 'admin_app:signalements_liste' %}" class="nav-item"><i class="bi bi-flag"></i> Signalements</a>
+    {% endif %}
+
+    <a href="#" class="nav-item"><i class="bi bi-gear"></i> Paramètres</a>
+    <form method="post" action="{% url 'logout' %}" style="margin-top: 2rem;">
+      {% csrf_token %}
+      <button class="nav-item" style="width:100%; text-align:left; color:#dc2626; background:none; border:none; cursor:pointer;">
+        <i class="bi bi-box-arrow-right"></i> Déconnexion
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="main">
+  <div class="top-bar">
+    <div class="page-title">
+      <h1>Tableau de bord</h1>
+    </div>
+    <div style="display: flex; align-items: center;">
+      <!-- Notifications -->
+      <div class="notification-icon" onclick="toggleNotifications()">
+        <i class="bi bi-bell"></i>
+        {% if notifications_non_lues > 0 %}
+          <span class="notification-badge">{{ notifications_non_lues }}</span>
+        {% endif %}
+      </div>
+      <div class="notifications-dropdown" id="notificationsDropdown">
+        {% if notifications %}
+          {% for notif in notifications|slice:":5" %}
+            <div class="notification-item">
+              <div class="notification-title">{{ notif.message }}</div>
+              <div class="notification-time">{{ notif.date_creation|timesince }} avant</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-3 text-muted">Aucune notification</div>
+        {% endif %}
+      </div>
+
+      <div class="user-info" onclick="toggleMenu()">
+        {% if user.photo_profil %}
+          <img src="{{ user.photo_profil.url }}" class="user-avatar" style="object-fit: cover;">
+        {% else %}
+          <div class="user-avatar">{{ user.get_full_name|default:user.username|make_list|first|upper }}</div>
+        {% endif %}
+        <span class="user-name d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
+        <i class="bi bi-chevron-down small"></i>
+      </div>
+      <div class="dropdown-menu-custom" id="userMenu">
+        {% if user.role == 'APPRENANT' %}
+          <a href="{% url 'profil_apprenant' %}" class="dropdown-item"><i class="bi bi-person"></i> Mon profil</a>
+        {% elif user.role == 'ENCADREUR' %}
+          <a href="{% url 'profil_encadreur' user.encadreur_profile.id %}" class="dropdown-item">
+  <i class="bi bi-person"></i> Mon profil
+</a>
+        {% else %}
+          <a href="/admin/" class="dropdown-item"><i class="bi bi-shield"></i> Admin Django</a>
+        {% endif %}
+        <div class="dropdown-divider"></div>
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="dropdown-item" style="width:100%; text-align:left; color:#dc2626;"><i class="bi bi-box-arrow-right"></i> Déconnexion</button></form>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="welcome-banner">
+      <h2>👋 Bienvenue, {{ user.get_full_name|default:user.username }} !</h2>
+      <p>
+        {% if user.role == 'APPRENANT' %}
+          Prêt à continuer votre apprentissage ?
+        {% elif user.role == 'ENCADREUR' %}
+          {% if user.est_verifie %}
+            Votre compte est validé. Vous pouvez gérer vos cours et recevoir des demandes.
+          {% else %}
+            ⏳ Votre compte est en attente de validation. Un administrateur examinera votre dossier sous 24-48h.
+          {% endif %}
+        {% else %}
+          Gérez la plateforme Zãmsɛ.
+        {% endif %}
+      </p>
+    </div>
+
+    {% if user.role == 'ENCADREUR' and not user.est_verifie %}
+    <div class="alert-warning-custom mb-4">
+      <i class="bi bi-clock-history me-2"></i>
+      <strong>Compte en attente de validation</strong><br>
+      Votre dossier est en cours d'examen. Vous serez notifié par email dès validation.
+    </div>
+    {% endif %}
+
+    <!-- Statistiques -->
+    <div class="stats-grid">
+      {% if user.role == 'APPRENANT' %}
+        <div class="stat-card"><div class="stat-value">{{ demandes|length }}</div><div class="stat-label">Demandes en cours</div></div>
+        <div class="stat-card"><div class="stat-value">{{ demandes_acceptees }}</div><div class="stat-label">Cours programmés</div></div>
+        <div class="stat-card"><div class="stat-value">{{ enfants|length }}</div><div class="stat-label">Enfants</div></div>
+        <div class="stat-card"><div class="stat-value">{{ messages_non_lus }}</div><div class="stat-label">Messages</div></div>
+      {% elif user.role == 'ENCADREUR' and user.est_verifie %}
+        <div class="stat-card"><div class="stat-value">{{ demandes_recues|length }}</div><div class="stat-label">Demandes reçues</div></div>
+        <div class="stat-card"><div class="stat-value">{{ demandes_acceptees }}</div><div class="stat-label">Cours acceptés</div></div>
+        <div class="stat-card"><div class="stat-value">{{ note_moyenne|floatformat:1 }}</div><div class="stat-label">Note moyenne</div></div>
+        <div class="stat-card"><div class="stat-value">{{ messages_non_lus }}</div><div class="stat-label">Messages</div></div>
+      {% elif user.role == 'ENCADREUR' and not user.est_verifie %}
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Demandes reçues</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Cours acceptés</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Note moyenne</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Messages</div></div>
+      {% else %}
+        <div class="stat-card" onclick="location.href='{% url 'admin_app:validation_encadreurs' %}'"><div class="stat-value">{{ encadreurs_attente|length }}</div><div class="stat-label">À valider</div></div>
+        <div class="stat-card"><div class="stat-value">{{ total_utilisateurs|default:"0" }}</div><div class="stat-label">Utilisateurs</div></div>
+        <div class="stat-card" onclick="location.href='{% url 'admin_app:signalements_liste' %}'"><div class="stat-value">{{ signalements|length }}</div><div class="stat-label">Signalements</div></div>
+        <div class="stat-card"><div class="stat-value">{{ total_demandes|default:"0" }}</div><div class="stat-label">Demandes</div></div>
+      {% endif %}
+    </div>
+
+    <div class="row">
+      <div class="col-lg-7">
+        <div class="card-modern">
+          <div class="card-header">
+            <h3><i class="bi bi-list-check"></i>
+              {% if user.role == 'APPRENANT' %}Mes demandes
+              {% elif user.role == 'ENCADREUR' and user.est_verifie %}Demandes reçues
+              {% elif user.role == 'ENCADREUR' and not user.est_verifie %}Demandes (attente validation)
+              {% else %}Encadreurs à valider{% endif %}
+            </h3>
+            <a href="#" class="text-decoration-none small" style="color:#e3b23c;">Voir tout →</a>
+          </div>
+          <div class="card-body">
+            {% if user.role == 'APPRENANT' %}
+              {% for d in demandes|slice:":3" %}
+              <div class="item-list"><div><div class="fw-semibold">{{ d.encadreur.utilisateur.get_full_name }}</div><small class="text-muted">{{ d.matiere|default:"Cours" }} • {{ d.date_creation|date:"d/m/Y" }}</small></div><span class="badge-status {% if d.statut == 'EN_ATTENTE' %}badge-pending{% else %}badge-accepted{% endif %}">{{ d.get_statut_display }}</span></div>
+              {% empty %}<p class="text-muted text-center py-3">Aucune demande</p>{% endfor %}
+            {% elif user.role == 'ENCADREUR' and user.est_verifie %}
+              {% for d in demandes_recues|slice:":3" %}
+              <div class="item-list"><div><div class="fw-semibold">{{ d.apprenant.get_full_name }}</div><small class="text-muted">{{ d.matiere|default:"Cours" }} • {{ d.date_creation|date:"d/m/Y" }}</small></div>{% if d.statut == 'EN_ATTENTE' %}<a href="#" class="btn btn-sm btn-warning rounded-pill">Répondre</a>{% else %}<span class="badge-status badge-accepted">Acceptée</span>{% endif %}</div>
+              {% empty %}<p class="text-muted text-center py-3">Aucune demande</p>{% endfor %}
+            {% elif user.role == 'ENCADREUR' and not user.est_verifie %}
+              <div class="text-center py-4"><i class="bi bi-hourglass-split fs-1 text-muted"></i><p class="mt-2">En attente de validation</p></div>
+            {% else %}
+              {% for e in encadreurs_attente|slice:":3" %}
+              <div class="item-list"><div><div class="fw-semibold">{{ e.utilisateur.get_full_name }}</div><small class="text-muted">{{ e.ville }} • {{ e.date_inscription|date:"d/m/Y" }}</small></div><a href="{% url 'admin_app:detail_encadreur' e.id %}" class="btn btn-sm btn-outline-primary rounded-pill">Voir</a></div>
+              {% empty %}<p class="text-muted text-center py-3">Aucun encadreur</p>{% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card-modern">
+          <div class="card-header">
+            <h3><i class="bi {% if user.role == 'APPRENANT' %}bi-people{% elif user.role == 'ENCADREUR' %}bi-book{% else %}bi-flag{% endif %}"></i>
+              {% if user.role == 'APPRENANT' %}Mes enfants
+              {% elif user.role == 'ENCADREUR' and user.est_verifie %}Mes matières
+              {% elif user.role == 'ENCADREUR' and not user.est_verifie %}Matières (attente)
+              {% else %}Signalements{% endif %}
+            </h3>
+            {% if user.role == 'APPRENANT' %}<button class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#ajouterEnfantModal">+ Ajouter</button>{% endif %}
+          </div>
+          <div class="card-body">
+            {% if user.role == 'APPRENANT' %}
+              {% for enfant in enfants %}
+              <div class="item-list"><div><i class="bi bi-person-circle me-2"></i>{{ enfant.prenom }} {{ enfant.nom }} <small class="text-muted">({{ enfant.niveau_scolaire|default:"Niveau non spécifié" }})</small></div><div><button class="btn btn-sm btn-outline-secondary rounded-pill me-1" onclick="modifierEnfant({{ enfant.id }})">Modifier</button><button class="btn btn-sm btn-outline-danger rounded-pill" onclick="supprimerEnfant({{ enfant.id }})">Supprimer</button></div></div>
+              {% empty %}<p class="text-muted text-center py-3">Aucun enfant</p>{% endfor %}
+            {% elif user.role == 'ENCADREUR' and user.est_verifie %}
+              {% for spec in specialisations|slice:":3" %}
+              <div class="item-list"><div><i class="bi bi-book me-2"></i>{{ spec.matiere.nom }} <small class="text-muted">({{ spec.tarif }} FCFA/h)</small>{% if spec.type_cours == 'DOMICILE' %}<span class="badge bg-light text-dark ms-1">🏠</span>{% else %}<span class="badge bg-light text-dark ms-1">👥</span>{% endif %}</div><div><a href="{% url 'modifier_matiere' spec.id %}" class="btn btn-sm btn-outline-secondary rounded-pill">Modifier</a></div></div>
+              {% empty %}<p class="text-muted text-center py-3">Aucune matière</p>{% endfor %}
+              <div class="mt-2"><a href="{% url 'ajouter_matiere' %}" class="btn btn-sm btn-primary w-100">+ Ajouter une matière</a></div>
+            {% elif user.role == 'ENCADREUR' and not user.est_verifie %}
+              <div class="text-center py-4"><i class="bi bi-hourglass-split fs-1 text-muted"></i><p class="mt-2">En attente de validation</p></div>
+            {% else %}
+              {% for s in signalements|slice:":3" %}
+              <div class="item-list"><div><i class="bi bi-flag me-2"></i>{{ s.encadreur.utilisateur.get_full_name }}<br><small class="text-muted">{{ s.get_type_signalement_display }}</small></div><a href="{% url 'admin_app:traiter_signalement' s.id %}" class="btn btn-sm btn-outline-primary rounded-pill">Traiter</a></div>
+              {% empty %}<p class="text-muted text-center py-3">Aucun signalement</p>{% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ajouter Enfant -->
+<div class="modal fade" id="ajouterEnfantModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0"><h5 class="fw-bold">Ajouter un enfant</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="post" action="{% url 'ajouter_enfant' %}">{% csrf_token %}
+        <div class="modal-body">
+          <input type="text" name="prenom" class="form-control mb-2" placeholder="Prénom" required>
+          <input type="text" name="nom" class="form-control mb-2" placeholder="Nom" required>
+          <select name="niveau_scolaire" class="form-select"><option value="">Niveau scolaire</option>{% for niveau in niveaux %}<option value="{{ niveau.nom }}">{{ niveau.nom }}</option>{% endfor %}</select>
+        </div>
+        <div class="modal-footer border-0"><button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button><button type="submit" class="btn btn-primary rounded-pill px-4">Ajouter</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleMenu() { document.getElementById('userMenu').classList.toggle('show'); }
+  function toggleNotifications() { document.getElementById('notificationsDropdown').classList.toggle('show'); }
+
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('userMenu');
+    const userInfo = document.querySelector('.user-info');
+    if (!userInfo.contains(e.target) && !menu.contains(e.target)) menu.classList.remove('show');
+
+    const notifIcon = document.querySelector('.notification-icon');
+    const notifDropdown = document.getElementById('notificationsDropdown');
+    if (!notifIcon.contains(e.target) && !notifDropdown.contains(e.target)) notifDropdown.classList.remove('show');
+  });
+
+  function modifierEnfant(id) { window.location.href = `/utilisateurs/modifier/enfant/${id}/`; }
+  function supprimerEnfant(id) { if (confirm('Supprimer cet enfant ?')) window.location.href = `/utilisateurs/supprimer/enfant/${id}/`; }
+</script>
+</body>
+</html>

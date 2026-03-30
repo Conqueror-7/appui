@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inscription apprenant - Zãmsɛ{% endblock %}
+
+{% block extra_css %}
+<style>
+  .inscription-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 1.5rem 2rem;
+    background: #f5f7fc;
+  }
+  .form-card {
+    display: flex;
+    max-width: 900px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px -8px rgba(0,0,0,0.1);
+  }
+  .form-image {
+    width: 34%;
+    background: url("{% static 'images/insAp.avif' %}") center/cover;
+    position: relative;
+    color: white;
+    padding: 1.2rem;
+    display: flex;
+    align-items: flex-end;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  .form-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+    border-radius: 24px 0 0 24px;
+  }
+  .form-image span { position: relative; z-index: 1; }
+  .form-content { width: 66%; background: white; }
+  .form-header { text-align: center; padding: 1.5rem 1rem 0.5rem; }
+  .logo { height: 42px; margin-bottom: 0.2rem; }
+  .form-header h2 { font-size: 1.2rem; font-weight: 700; color: #0f2b4b; margin: 0; }
+  .form-header p { color: #6b7280; font-size: 0.7rem; }
+  .form-body { padding: 0 1.5rem 1.5rem; }
+  .row-fields { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .field-group { flex: 1; min-width: 130px; }
+  .field-group label { display: block; font-size: 0.7rem; font-weight: 600; margin-bottom: 0.3rem; color: #1e293b; }
+  .field-group label .required { color: #dc3545; }
+  .input-field {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    transition: 0.2s;
+  }
+  .input-field:focus { outline: none; border-color: #e3b23c; box-shadow: 0 0 0 3px rgba(227,178,60,0.1); }
+  .input-field.error { border-color: #dc3545; background: #fff5f5; }
+  .input-field.valid { border-color: #28a745; background: #f0fff4; }
+  .error-message { color: #dc3545; font-size: 0.6rem; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.2rem; }
+  .success-message { color: #28a745; font-size: 0.6rem; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.2rem; }
+  .field-hint { font-size: 0.55rem; color: #6b7280; margin-top: 0.2rem; }
+  .role-cards { display: flex; gap: 1rem; margin-bottom: 1rem; }
+  .role-card {
+    flex: 1;
+    text-align: center;
+    padding: 0.6rem;
+    background: #f8fafc;
+    border-radius: 20px;
+    border: 1.5px solid #e2e8f0;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .role-card.selected { background: #fff8e1; border-color: #e3b23c; }
+  .role-card i { font-size: 1.2rem; color: #0f2b4b; }
+  .role-card .title { font-weight: 600; font-size: 0.7rem; margin-top: 0.2rem; }
+  .password-wrapper { position: relative; }
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+  }
+  .btn-submit {
+    width: 100%;
+    background: #0f2b4b;
+    border: none;
+    border-radius: 40px;
+    padding: 0.7rem;
+    font-weight: 600;
+    color: white;
+    margin-top: 0.5rem;
+    transition: 0.2s;
+    cursor: pointer;
+  }
+  .btn-submit:hover { background: #1e3a5f; }
+  .alert-message { padding: 0.5rem 0.8rem; border-radius: 20px; font-size: 0.75rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem; }
+  .alert-success { background: #dcfce7; color: #166534; }
+  .alert-error { background: #fee2e2; color: #991b1b; }
+  .text-link { color: #e3b23c; text-decoration: none; font-size: 0.7rem; font-weight: 500; }
+  @media (max-width: 750px) {
+    .form-card { flex-direction: column; }
+    .form-image { width: 100%; height: 90px; align-items: center; justify-content: center; text-align: center; padding: 0.5rem; }
+    .form-image::before { border-radius: 24px 24px 0 0; }
+    .form-content { width: 100%; }
+    .row-fields, .role-cards { flex-direction: column; }
+    .inscription-page { padding: 60px 1rem 1.5rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inscription-page">
+  <div class="form-card">
+    <div class="form-image"><span>Réussissez avec Zãmsɛ 🎓</span></div>
+    <div class="form-content">
+      <div class="form-header">
+        <img src="{% static 'images/logo.png' %}" class="logo">
+        <h2>Créer mon compte</h2>
+        <p>Rejoignez la communauté Zãmsɛ</p>
+      </div>
+      <div class="form-body">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert-message alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+              <i class="bi bi-{% if message.tags == 'error' %}exclamation-triangle-fill{% else %}check-circle-fill{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post" id="inscriptionForm">
+          {% csrf_token %}
+
+          <div class="row-fields">
+            <div class="field-group">
+              <label>Prénom <span class="required">*</span></label>
+              <input type="text" name="prenom" id="prenom" class="input-field" value="{{ form.prenom.value|default:'' }}" required>
+              <div class="error-message" id="prenomError" style="display: none;"><i class="bi bi-exclamation-circle"></i> Prénom requis</div>
+              <div class="success-message" id="prenomSuccess" style="display: none;"><i class="bi bi-check-circle"></i> OK</div>
+            </div>
+            <div class="field-group">
+              <label>Nom <span class="required">*</span></label>
+              <input type="text" name="nom" id="nom" class="input-field" value="{{ form.nom.value|default:'' }}" required>
+              <div class="error-message" id="nomError" style="display: none;"><i class="bi bi-exclamation-circle"></i> Nom requis</div>
+              <div class="success-message" id="nomSuccess" style="display: none;"><i class="bi bi-check-circle"></i> OK</div>
+            </div>
+          </div>
+
+          <div class="row-fields">
+            <div class="field-group">
+              <label>Email <span class="required">*</span></label>
+              <input type="email" name="email" id="email" class="input-field" value="{{ form.email.value|default:'' }}" required>
+              <div class="error-message" id="emailError" style="display: none;"><i class="bi bi-exclamation-circle"></i> Email valide requis</div>
+              <div class="success-message" id="emailSuccess" style="display: none;"><i class="bi bi-check-circle"></i> OK</div>
+            </div>
+            <div class="field-group">
+              <label>Téléphone <span class="required">*</span></label>
+              <input type="tel" name="telephone" id="telephone" class="input-field" value="{{ form.telephone.value|default:'' }}" maxlength="8" required>
+              <div class="field-hint">8 chiffres (ex: 70123456)</div>
+              <div class="error-message" id="telError" style="display: none;"><i class="bi bi-exclamation-circle"></i> 8 chiffres requis</div>
+              <div class="success-message" id="telSuccess" style="display: none;"><i class="bi bi-check-circle"></i> OK</div>
+            </div>
+          </div>
+
+          <div class="field-group mb-2">
+            <label class="role-label">Je suis <span class="required">*</span></label>
+            <div class="role-cards">
+              <div class="role-card" id="parent-card"><i class="bi bi-people-fill"></i><div class="title">Parent</div><input type="radio" name="type_apprenant" value="PARENT" class="d-none" {% if form.type_apprenant.value == 'PARENT' %}checked{% endif %} required></div>
+              <div class="role-card" id="eleve-card"><i class="bi bi-backpack-fill"></i><div class="title">Élève autonome</div><input type="radio" name="type_apprenant" value="ELEVE" class="d-none" {% if form.type_apprenant.value == 'ELEVE' %}checked{% endif %} required></div>
+            </div>
+            <div class="error-message" id="roleError" style="display: none;"><i class="bi bi-exclamation-circle"></i> Sélectionnez un type</div>
+          </div>
+
+          <div class="row-fields">
+            <div class="field-group">
+              <label>Mot de passe <span class="required">*</span></label>
+              <div class="password-wrapper">
+                <input type="password" name="password1" id="password1" class="input-field" minlength="8" required>
+                <button type="button" class="password-toggle" onclick="togglePassword('password1')"><i class="bi bi-eye-slash"></i></button>
+              </div>
+              <div class="field-hint">8 caractères minimum</div>
+              <div class="error-message" id="pwd1Error" style="display: none;"><i class="bi bi-exclamation-circle"></i> 8 caractères minimum</div>
+              <div class="success-message" id="pwd1Success" style="display: none;"><i class="bi bi-check-circle"></i> OK</div>
+            </div>
+            <div class="field-group">
+              <label>Confirmer <span class="required">*</span></label>
+              <div class="password-wrapper">
+                <input type="password" name="password2" id="password2" class="input-field" required>
+                <button type="button" class="password-toggle" onclick="togglePassword('password2')"><i class="bi bi-eye-slash"></i></button>
+              </div>
+              <div class="error-message" id="pwd2Error" style="display: none;"><i class="bi bi-exclamation-circle"></i> Mots de passe différents</div>
+              <div class="success-message" id="pwd2Success" style="display: none;"><i class="bi bi-check-circle"></i> OK</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">S'inscrire</button>
+        </form>
+
+        <p class="text-center mt-3 mb-0"><a href="{% url 'login' %}" class="text-link">Déjà un compte ? Se connecter</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Rôle
+  const parentCard = document.getElementById('parent-card');
+  const eleveCard = document.getElementById('eleve-card');
+  const parentRadio = parentCard.querySelector('input');
+  const eleveRadio = eleveCard.querySelector('input');
+  const roleError = document.getElementById('roleError');
+
+  const updateRole = () => {
+    parentCard.classList.toggle('selected', parentRadio.checked);
+    eleveCard.classList.toggle('selected', eleveRadio.checked);
+    if (parentRadio.checked || eleveRadio.checked) roleError.style.display = 'none';
+  };
+  parentCard.onclick = () => { parentRadio.checked = true; updateRole(); };
+  eleveCard.onclick = () => { eleveRadio.checked = true; updateRole(); };
+  updateRole();
+
+  // Validation en temps réel
+  const fields = {
+    prenom: { el: document.getElementById('prenom'), err: document.getElementById('prenomError'), success: document.getElementById('prenomSuccess'), validate: v => v.trim() !== '' },
+    nom: { el: document.getElementById('nom'), err: document.getElementById('nomError'), success: document.getElementById('nomSuccess'), validate: v => v.trim() !== '' },
+    email: { el: document.getElementById('email'), err: document.getElementById('emailError'), success: document.getElementById('emailSuccess'), validate: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    tel: { el: document.getElementById('telephone'), err: document.getElementById('telError'), success: document.getElementById('telSuccess'), validate: v => /^\d{8}$/.test(v) },
+    pwd1: { el: document.getElementById('password1'), err: document.getElementById('pwd1Error'), success: document.getElementById('pwd1Success'), validate: v => v.length >= 8 }
+  };
+
+  Object.keys(fields).forEach(key => {
+    const f = fields[key];
+    f.el.addEventListener('input', () => {
+      const isValid = f.validate(f.el.value);
+      f.err.style.display = (!isValid && f.el.value) ? 'flex' : 'none';
+      if (f.success) f.success.style.display = (isValid && f.el.value) ? 'flex' : 'none';
+      f.el.classList.toggle('error', !isValid && f.el.value);
+      f.el.classList.toggle('valid', isValid && f.el.value);
+      if (key === 'tel') f.el.value = f.el.value.replace(/\D/g, '').slice(0, 8);
+      if (key === 'pwd1') validateMatch();
+    });
+  });
+
+  const p2 = document.getElementById('password2');
+  const pwd2Error = document.getElementById('pwd2Error');
+  const pwd2Success = document.getElementById('pwd2Success');
+
+  const validateMatch = () => {
+    const match = p2.value && fields.pwd1.el.value === p2.value;
+    pwd2Error.style.display = (!match && p2.value) ? 'flex' : 'none';
+    pwd2Success.style.display = (match && p2.value) ? 'flex' : 'none';
+    p2.classList.toggle('error', !match && p2.value);
+    p2.classList.toggle('valid', match && p2.value);
+    return match;
+  };
+  p2.addEventListener('input', validateMatch);
+
+  // Soumission avec logs
+  const form = document.getElementById('inscriptionForm');
+
+  form.onsubmit = (e) => {
+    console.log('=== VÉRIFICATION AVANT ENVOI ===');
+
+    let valid = true;
+
+    // Vérifier chaque champ
+    Object.keys(fields).forEach(key => {
+      const val = fields[key].validate(fields[key].el.value);
+      console.log(`${key}: ${fields[key].el.value} -> ${val ? 'OK' : 'ERREUR'}`);
+      if (!val) valid = false;
+    });
+
+    // Vérifier confirmation mot de passe
+    const match = p2.value && fields.pwd1.el.value === p2.value;
+    console.log(`Confirmation: ${match ? 'OK' : 'ERREUR'}`);
+    if (!match) valid = false;
+
+    // Vérifier rôle
+    const roleOk = parentRadio.checked || eleveRadio.checked;
+    console.log(`Rôle: ${roleOk ? 'OK' : 'ERREUR'}`);
+    if (!roleOk) valid = false;
+
+    console.log(`Résultat final: ${valid ? 'VALIDÉ' : 'INVALIDE'}`);
+
+    if (!valid) {
+      e.preventDefault();
+      alert('Veuillez corriger les erreurs');
+      return false;
+    }
+
+    return true;
+  };
+
+  function togglePassword(id) {
+    const f = document.getElementById(id);
+    const icon = f.parentElement.querySelector('.password-toggle i');
+    f.type = f.type === 'password' ? 'text' : 'password';
+    icon.classList.toggle('bi-eye');
+    icon.classList.toggle('bi-eye-slash');
+  }
+</script>
+{% endblock %}

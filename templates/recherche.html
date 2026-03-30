@@ -1,0 +1,511 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rechercher un encadreur - Zãmsɛ{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #0f2b4b;
+    --accent: #e3b23c;
+    --gray-100: #f8fafc;
+    --gray-200: #e2e8f0;
+    --gray-500: #64748b;
+  }
+
+  body { background: #f1f5f9; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, var(--primary) 0%, #1e3a5f 100%);
+    padding: 2rem 0;
+    text-align: center;
+  }
+  .hero h1 { font-size: 1.6rem; font-weight: 700; color: white; margin-bottom: 0.5rem; }
+  .hero p { color: rgba(255,255,255,0.85); font-size: 1rem; }
+
+  /* Barre de recherche */
+  .search-bar {
+    max-width: 550px;
+    margin: 1rem auto 0;
+    background: white;
+    border-radius: 60px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .search-bar input {
+    flex: 1;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+  }
+  .search-bar button {
+    background: var(--accent);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--primary);
+    transition: all 0.2s;
+  }
+  .search-bar button:hover { background: #c49a1f; }
+
+  /* Filtres */
+  .filters-section {
+    background: white;
+    padding: 1.2rem;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 90px;
+  }
+  .filters-title {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--primary);
+    font-size: 0.9rem;
+  }
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .filter-field label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 0.3rem;
+  }
+  .filter-field select, .filter-field input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .filter-field select:focus, .filter-field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(227,178,60,0.1);
+  }
+  .price-group { display: flex; gap: 0.5rem; }
+  .price-group input { width: 50%; }
+  .price-hint { font-size: 0.6rem; color: var(--gray-500); margin-top: 0.2rem; }
+  .btn-reset, .btn-apply {
+    padding: 0.5rem;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--gray-200);
+  }
+  .btn-reset:hover { background: #f1f5f9; border-color: var(--gray-500); }
+  .btn-apply {
+    background: var(--primary);
+    color: white;
+    border: none;
+  }
+  .btn-apply:hover { background: #1e3a5f; transform: translateY(-1px); }
+
+  /* Cartes résultats */
+  .result-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+  }
+  .result-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .avatar {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--gray-100);
+  }
+  .badge-verified {
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    border-radius: 30px;
+  }
+  .stars { color: #f5b042; font-size: 0.75rem; }
+  .price { font-weight: 700; color: var(--primary); font-size: 1rem; }
+  .btn-view {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-view:hover { background: #1e3a5f; transform: translateY(-1px); }
+  .btn-save {
+    background: transparent;
+    border: 1px solid var(--gray-200);
+    padding: 0.4rem 1rem;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-save:hover { border-color: var(--accent); color: var(--accent); background: #fef9e6; }
+  .active-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .tag {
+    background: #f1f5f9;
+    padding: 0.2rem 0.6rem;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .tag i { cursor: pointer; transition: all 0.2s; }
+  .tag i:hover { color: #dc2626; }
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 16px;
+  }
+  .empty-state i { font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem; }
+  .pagination .page-link {
+    border-radius: 30px;
+    margin: 0 2px;
+    color: var(--primary);
+  }
+  .pagination .active .page-link {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--primary);
+  }
+  @media (max-width: 992px) {
+    .filters-section { position: static; margin-bottom: 1rem; }
+  }
+  @media (max-width: 768px) {
+    .filters-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.3rem; }
+    .result-card .row { flex-direction: column; text-align: center; }
+    .result-card .col-auto { margin-bottom: 0.5rem; }
+    .btn-view, .btn-save { width: 100%; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="hero">
+  <div class="container">
+    <h1>📚 Que voulez-vous apprendre ?</h1>
+    <p>Trouvez l'encadreur idéal près de chez vous</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Matière, nom ou ville..." value="{{ query }}">
+      <button id="searchBtn">Rechercher</button>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Filtres -->
+    <div class="col-lg-4">
+      <div class="filters-section">
+        <div class="filters-title">🎯 Affiner votre recherche</div>
+
+        <div class="filters-grid">
+          <div class="filter-field">
+            <label>📖 Matière</label>
+            <select id="filterMatiere" onchange="applyFilters()">
+              <option value="">Toutes les matières</option>
+              {% for m in matieres %}
+                <option value="{{ m.id }}" {% if selected_matiere == m.id %}selected{% endif %}>{{ m.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label>📍 Ville</label>
+            <select id="filterVille" onchange="applyFilters()">
+              <option value="">Toutes les villes</option>
+              {% for v in villes %}
+                <option value="{{ v }}" {% if selected_ville == v %}selected{% endif %}>{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label>💰 Prix par heure</label>
+            <div class="price-group">
+              <input type="number" id="priceMin" placeholder="Min" value="{{ tarif_min }}" onchange="applyFilters()">
+              <input type="number" id="priceMax" placeholder="Max" value="{{ tarif_max }}" onchange="applyFilters()">
+            </div>
+            <div class="price-hint">💡 Ex: 3000 - 8000 FCFA</div>
+          </div>
+
+          <div class="filter-field">
+            <label>🎓 Classe</label>
+            <select id="filterClasse" onchange="applyFilters()">
+              <option value="">Toutes les classes</option>
+              {% for classe in classes %}
+                <option value="{{ classe.id }}" {% if selected_classe == classe.id %}selected{% endif %}>{{ classe.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label>👤 Genre</label>
+            <select id="filterGenre" onchange="applyFilters()">
+              <option value="">Peu importe</option>
+              <option value="HOMME" {% if selected_genre == 'HOMME' %}selected{% endif %}>Homme</option>
+              <option value="FEMME" {% if selected_genre == 'FEMME' %}selected{% endif %}>Femme</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label>🏠 Type de cours</label>
+            <select id="filterTypeCours" onchange="applyFilters()">
+              <option value="">Tous types</option>
+              <option value="DOMICILE" {% if selected_type_cours == 'DOMICILE' %}selected{% endif %}>🏠 Cours à domicile</option>
+              <option value="GROUPE" {% if selected_type_cours == 'GROUPE' %}selected{% endif %}>👥 Cours groupés</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row mt-3 g-2">
+          <div class="col-6">
+            <button class="btn-reset" onclick="resetFilters()">🗑️ Réinitialiser</button>
+          </div>
+          <div class="col-6">
+            <button class="btn-apply" onclick="applyFilters()">🔍 Appliquer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="col-lg-8">
+      <!-- Filtres actifs -->
+      {% if has_filters %}
+      <div class="active-tags">
+        {% if query %}<span class="tag">🔍 {{ query }} <i class="bi bi-x" onclick="removeFilter('q')"></i></span>{% endif %}
+        {% if selected_matiere_nom %}<span class="tag">📖 {{ selected_matiere_nom }} <i class="bi bi-x" onclick="removeFilter('matiere')"></i></span>{% endif %}
+        {% if selected_ville %}<span class="tag">📍 {{ selected_ville }} <i class="bi bi-x" onclick="removeFilter('ville')"></i></span>{% endif %}
+        {% if tarif_min or tarif_max %}<span class="tag">💰 {{ tarif_min|default:"0" }} - {{ tarif_max|default:"∞" }} FCFA <i class="bi bi-x" onclick="removeFilter('tarif')"></i></span>{% endif %}
+        {% if selected_classe_nom %}<span class="tag">🎓 {{ selected_classe_nom }} <i class="bi bi-x" onclick="removeFilter('classe')"></i></span>{% endif %}
+        {% if selected_genre == 'HOMME' %}<span class="tag">👤 Homme <i class="bi bi-x" onclick="removeFilter('genre')"></i></span>{% endif %}
+        {% if selected_genre == 'FEMME' %}<span class="tag">👤 Femme <i class="bi bi-x" onclick="removeFilter('genre')"></i></span>{% endif %}
+        {% if selected_type_cours == 'DOMICILE' %}<span class="tag">🏠 Cours à domicile <i class="bi bi-x" onclick="removeFilter('type_cours')"></i></span>{% endif %}
+        {% if selected_type_cours == 'GROUPE' %}<span class="tag">👥 Cours groupés <i class="bi bi-x" onclick="removeFilter('type_cours')"></i></span>{% endif %}
+      </div>
+      {% endif %}
+
+      <!-- En-tête -->
+      <div class="results-header">
+        <div><strong>{{ nb_resultats }}</strong> encadreur(s) trouvé(s)</div>
+        <select id="sortSelect" class="form-select form-select-sm w-auto" style="border-radius:30px;" onchange="changeTri(this.value)">
+          <option value="pertinence" {% if tri == 'pertinence' %}selected{% endif %}>📊 Pertinence</option>
+          <option value="note" {% if tri == 'note' %}selected{% endif %}>⭐ Meilleure note</option>
+          <option value="tarif" {% if tri == 'tarif' %}selected{% endif %}>💰 Prix croissant</option>
+        </select>
+      </div>
+
+      <!-- Liste des résultats -->
+      {% if specialisations %}
+        {% for spec in specialisations %}
+        <div class="result-card">
+          <div class="row align-items-center">
+            <div class="col-auto">
+              {% if spec.encadreur.utilisateur.photo_profil %}
+                <img src="{{ spec.encadreur.utilisateur.photo_profil.url }}" class="avatar">
+              {% else %}
+                <div class="avatar d-flex align-items-center justify-content-center bg-light">
+                  <i class="bi bi-person-circle fs-2 text-secondary"></i>
+                </div>
+              {% endif %}
+            </div>
+            <div class="col">
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h6 class="fw-bold mb-0">{{ spec.encadreur.utilisateur.get_full_name }}</h6>
+                {% if spec.encadreur.utilisateur.est_verifie %}
+                  <span class="badge-verified">✓ Vérifié</span>
+                {% endif %}
+              </div>
+              <div class="d-flex flex-wrap gap-3 mt-1">
+                <small><i class="bi bi-book"></i> {{ spec.matiere.nom }}</small>
+                <small><i class="bi bi-geo-alt"></i> {{ spec.encadreur.ville }}</small>
+              </div>
+              <div class="stars mt-1">
+                {% with note=spec.encadreur.note_moyenne|default:0 %}
+                  {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= note %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                  {% endfor %}
+                  <span class="text-muted ms-1">({{ spec.encadreur.nb_evaluations|default:0 }})</span>
+                {% endwith %}
+              </div>
+              <div class="price mt-1">{{ spec.tarif|default:"--" }} <small>FCFA/h</small></div>
+              <div class="mt-1">
+                {% if spec.se_deplace %}<span class="badge bg-light text-dark me-1">🏠 À domicile</span>{% endif %}
+                {% if spec.cours_groupe %}<span class="badge bg-light text-dark">👥 Cours groupés</span>{% endif %}
+              </div>
+            </div>
+            <div class="col-auto text-end">
+              <a href="{% url 'profil_encadreur' spec.encadreur.id %}" class="btn-view mb-2 d-block">
+                <i class="bi bi-eye me-1"></i>Voir le profil
+              </a>
+              <button class="btn-save w-100" onclick="event.stopPropagation(); saveTeacher(this, {{ spec.id }})">
+                <i class="bi bi-heart"></i> Sauvegarder
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if paginator.num_pages > 1 %}
+        <nav class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if specialisations.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page=1{{ query_string }}"><i class="bi bi-chevron-double-left"></i></a></li>
+              <li class="page-item"><a class="page-link" href="?page={{ specialisations.previous_page_number }}{{ query_string }}"><i class="bi bi-chevron-left"></i></a></li>
+            {% endif %}
+            {% for num in specialisations.paginator.page_range %}
+              {% if num == specialisations.number %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% elif num > specialisations.number|add:'-3' and num < specialisations.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}{{ query_string }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+            {% if specialisations.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ specialisations.next_page_number }}{{ query_string }}"><i class="bi bi-chevron-right"></i></a></li>
+              <li class="page-item"><a class="page-link" href="?page={{ specialisations.paginator.num_pages }}{{ query_string }}"><i class="bi bi-chevron-double-right"></i></a></li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-search"></i>
+          <h5 class="fw-bold">Aucun encadreur trouvé</h5>
+          <p class="text-muted">Essayez avec d'autres critères de recherche</p>
+          <button class="btn btn-outline-primary rounded-pill px-4 mt-2" onclick="resetFilters()">Réinitialiser les filtres</button>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Éléments DOM
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const sortSelect = document.getElementById('sortSelect');
+
+  // Recherche
+  searchBtn.onclick = () => {
+    const q = searchInput.value.trim();
+    if (q) window.location.href = "{% url 'recherche' %}?q=" + encodeURIComponent(q);
+    else applyFilters();
+  };
+  searchInput.onkeypress = e => e.key === 'Enter' && searchBtn.click();
+
+  // Tri
+  function changeTri(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tri', value);
+    window.location.href = url.toString();
+  }
+
+  // Appliquer tous les filtres
+  function applyFilters() {
+    const params = new URLSearchParams();
+    const q = searchInput.value.trim();
+    if (q) params.set('q', q);
+
+    const matiere = document.getElementById('filterMatiere').value;
+    if (matiere) params.set('matiere', matiere);
+
+    const ville = document.getElementById('filterVille').value;
+    if (ville) params.set('ville', ville);
+
+    const min = document.getElementById('priceMin').value;
+    const max = document.getElementById('priceMax').value;
+    if (min) params.set('tarif_min', min);
+    if (max) params.set('tarif_max', max);
+
+    const classe = document.getElementById('filterClasse').value;
+    if (classe) params.set('classe', classe);
+
+    const genre = document.getElementById('filterGenre').value;
+    if (genre) params.set('genre', genre);
+
+    const typeCours = document.getElementById('filterTypeCours').value;
+    if (typeCours) params.set('type_cours', typeCours);
+
+    window.location.href = "{% url 'recherche' %}?" + params.toString();
+  }
+
+  // Réinitialiser
+  function resetFilters() {
+    window.location.href = "{% url 'recherche' %}";
+  }
+
+  // Supprimer un filtre
+  function removeFilter(filter) {
+    const url = new URL(window.location.href);
+    const filters = ['q', 'matiere', 'ville', 'classe', 'genre', 'type_cours'];
+    if (filter === 'tarif') {
+      url.searchParams.delete('tarif_min');
+      url.searchParams.delete('tarif_max');
+    } else if (filters.includes(filter)) {
+      url.searchParams.delete(filter);
+    }
+    window.location.href = url.toString();
+  }
+
+  // Sauvegarder encadreur
+  function saveTeacher(btn, id) {
+    btn.classList.toggle('active');
+    const icon = btn.querySelector('i');
+    if (btn.classList.contains('active')) {
+      icon.classList.remove('bi-heart');
+      icon.classList.add('bi-heart-fill');
+    } else {
+      icon.classList.remove('bi-heart-fill');
+      icon.classList.add('bi-heart');
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connexion - Zãmsɛ</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .login-card {
+    max-width: 400px;
+    width: 100%;
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .logo { text-align: center; margin-bottom: 1.5rem; }
+  .logo img { height: 50px; }
+  .form-control {
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
+  .form-control:focus {
+    border-color: #0f2b4b;
+    box-shadow: 0 0 0 2px rgba(15,43,75,0.1);
+  }
+  .form-control.error { border-color: #dc3545; background: #fff5f5; }
+  .btn-login {
+    background: #0f2b4b;
+    border: none;
+    padding: 0.7rem;
+    border-radius: 40px;
+    font-weight: 600;
+    width: 100%;
+  }
+  .btn-login:hover { background: #1e3a5f; }
+  .password-wrapper { position: relative; }
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #999;
+  }
+  .error-text { color: #dc3545; font-size: 0.7rem; margin-top: 0.25rem; display: none; }
+  .alert { font-size: 0.8rem; padding: 0.6rem 1rem; border-radius: 10px; margin-bottom: 1rem; }
+  .alert-danger { background: #fee2e2; color: #991b1b; }
+  .alert-success { background: #dcfce7; color: #166534; }
+  .register-link { color: #0f2b4b; text-decoration: none; font-weight: 500; }
+  .register-link:hover { text-decoration: underline; }
+  hr { margin: 1.5rem 0; }
+</style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Zãmsɛ">
+  </div>
+  <h2 class="text-center fs-4 fw-bold mb-3">Connexion</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" action="{% url 'login' %}" id="loginForm">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next|default:'' }}">
+
+    <div class="mb-3">
+      <input type="text" name="username" id="username" class="form-control" placeholder="Email ou nom d'utilisateur" required autofocus>
+      <div id="usernameError" class="error-text">Email ou nom d'utilisateur requis</div>
+    </div>
+
+    <div class="mb-3">
+      <div class="password-wrapper">
+        <input type="password" name="password" id="password" class="form-control" placeholder="Mot de passe" required>
+        <button type="button" class="password-toggle" onclick="togglePassword()">
+          <i class="bi bi-eye-slash"></i>
+        </button>
+      </div>
+      <div id="passwordError" class="error-text">Mot de passe requis</div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <label class="small text-muted">
+        <input type="checkbox" name="remember"> Se souvenir
+      </label>
+      <a href="{% url 'password_reset' %}" class="small register-link">Mot de passe oublié ?</a>
+    </div>
+
+    <button type="submit" class="btn btn-login text-white">Se connecter</button>
+  </form>
+
+  <hr>
+  <div class="text-center small text-muted mb-3">Nouveau sur Zãmsɛ ?</div>
+  <div class="d-grid gap-2">
+    <a href="{% url 'inscription_apprenant' %}" class="btn btn-outline-secondary rounded-pill">Créer un compte apprenant</a>
+    <a href="{% url 'inscription_encadreur' %}" class="btn btn-outline-secondary rounded-pill">Créer un compte encadreur</a>
+  </div>
+</div>
+
+<script>
+  const username = document.getElementById('username');
+  const password = document.getElementById('password');
+  const usernameError = document.getElementById('usernameError');
+  const passwordError = document.getElementById('passwordError');
+
+  function togglePassword() {
+    const type = password.type === 'password' ? 'text' : 'password';
+    password.type = type;
+    const icon = document.querySelector('.password-toggle i');
+    icon.classList.toggle('bi-eye');
+    icon.classList.toggle('bi-eye-slash');
+  }
+
+  [username, password].forEach(input => {
+    input.addEventListener('input', () => {
+      input.classList.remove('error');
+      document.getElementById(`${input.id}Error`).style.display = 'none';
+    });
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    let error = false;
+    if (!username.value.trim()) {
+      username.classList.add('error');
+      usernameError.style.display = 'block';
+      error = true;
+    }
+    if (!password.value.trim()) {
+      password.classList.add('error');
+      passwordError.style.display = 'block';
+      error = true;
+    }
+    if (error) e.preventDefault();
+  });
+</script>
+</body>
+</html>

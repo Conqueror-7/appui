@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer une matière - Zãmsɛ{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 text-center">
+          <i class="bi bi-exclamation-triangle-fill fs-1 text-warning mb-3"></i>
+          <h2 class="fw-bold mb-3">Supprimer cette matière</h2>
+          <p class="text-muted mb-4">
+            Êtes-vous sûr de vouloir supprimer <strong>{{ specialisation.matiere.nom }}</strong> ?
+          </p>
+          <div class="alert alert-warning small">
+            <i class="bi bi-info-circle me-2"></i>
+            Cette action est irréversible. Les apprenants ne pourront plus vous contacter pour cette matière.
+          </div>
+          <form method="post">
+            {% csrf_token %}
+            <div class="d-flex gap-2">
+              <a href="{% url 'gerer_specialisations' %}" class="btn btn-light rounded-pill px-4 flex-grow-1">Annuler</a>
+              <button type="submit" class="btn btn-danger rounded-pill px-4 flex-grow-1">Supprimer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

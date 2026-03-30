@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Devenir encadreur - Zãmsɛ{% endblock %}
+
+{% block extra_css %}
+<style>
+  .inscription-page {
+    min-height: 100vh;
+    padding: 100px 1.5rem 3rem 1.5rem;
+    background: #f5f7fc;
+  }
+  .form-container { max-width: 950px; margin: 0 auto; }
+  .form-card {
+    display: flex;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+    background: white;
+  }
+  .form-image {
+    width: 35%;
+    background: linear-gradient(rgba(15,43,75,0.6), rgba(15,43,75,0.6)), url("{% static 'images/insE.avif' %}");
+    background-size: cover;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: white;
+  }
+  .form-image h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .step-indicator { margin-top: 1.5rem; }
+  .step-dot {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  .step-dot .dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+  .step-dot.active .dot, .step-dot.completed .dot {
+    background: #e3b23c;
+    color: #0f2b4b;
+  }
+  .step-dot .step-text { font-size: 0.7rem; opacity: 0.7; }
+  .step-dot.active .step-text { opacity: 1; font-weight: 600; }
+  .form-content { width: 65%; background: white; }
+  .form-header {
+    padding: 1.5rem 1.8rem 0.5rem;
+    border-bottom: 1px solid #eef2ff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .form-header h2 { font-size: 1.4rem; font-weight: 700; color: #0f2b4b; margin: 0; }
+  .step-counter { font-size: 0.8rem; color: #6b7280; }
+  .form-body { padding: 1.2rem 1.8rem 1.5rem; min-height: 450px; }
+  .step-content { display: none; }
+  .step-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+  .row-fields { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .field-group { flex: 1; min-width: 130px; margin-bottom: 1rem; }
+  .field-group label { display: block; font-weight: 600; font-size: 0.75rem; margin-bottom: 0.4rem; color: #1e293b; }
+  .field-group label .required { color: #dc3545; }
+  .input-field, .form-select, textarea {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .input-field:focus, .form-select:focus, textarea:focus {
+    outline: none;
+    border-color: #e3b23c;
+    box-shadow: 0 0 0 3px rgba(227,178,60,0.1);
+  }
+  .input-field.error, .form-select.error, textarea.error {
+    border-color: #dc3545 !important;
+    background: #fff5f5;
+  }
+  .input-field.valid, .form-select.valid, textarea.valid {
+    border-color: #28a745 !important;
+    background: #f0fff4;
+  }
+  .field-hint { font-size: 0.6rem; color: #6b7280; margin-top: 0.25rem; }
+  .error-message { color: #dc3545; font-size: 0.65rem; margin-top: 0.25rem; display: none; }
+  .password-wrapper { position: relative; }
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+  }
+  .btn-nav { display: flex; gap: 1rem; margin-top: 1.5rem; }
+  .btn-prev, .btn-next, .btn-submit {
+    padding: 0.7rem 1.5rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  .btn-prev { background: #f1f5f9; color: #475569; }
+  .btn-next, .btn-submit { background: #0f2b4b; color: white; flex: 1; }
+  .btn-next:hover, .btn-submit:hover { background: #1e3a5f; transform: translateY(-1px); }
+  .alert-message {
+    border-radius: 20px;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .alert-success { background: #dcfce7; color: #166534; }
+  .alert-error { background: #fee2e2; color: #991b1b; }
+  .info-box {
+    background: #fef9e6;
+    border-left: 4px solid #e3b23c;
+    border-radius: 16px;
+    padding: 0.8rem 1rem;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+  }
+  .text-link { color: #e3b23c; text-decoration: none; font-weight: 500; font-size: 0.8rem; }
+  @media (max-width: 850px) {
+    .form-card { flex-direction: column; }
+    .form-image { width: 100%; padding: 1.5rem; min-height: 180px; }
+    .form-content { width: 100%; }
+    .row-fields { flex-direction: column; gap: 0; }
+    .btn-nav { flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inscription-page">
+  <div class="form-container">
+    <div class="form-card">
+
+      <div class="form-image">
+        <h3>👨‍🏫 Devenez encadreur</h3>
+        <p>Partagez votre savoir et gagnez de l'argent</p>
+        <div class="step-indicator">
+          <div class="step-dot" id="step1-indicator"><div class="dot">1</div><div class="step-text">Identité</div></div>
+          <div class="step-dot" id="step2-indicator"><div class="dot">2</div><div class="step-text">Documents</div></div>
+          <div class="step-dot" id="step3-indicator"><div class="dot">3</div><div class="step-text">Finalisation</div></div>
+        </div>
+      </div>
+
+      <div class="form-content">
+        <div class="form-header">
+          <h2>Créer mon compte encadreur</h2>
+          <div class="step-counter" id="step-counter">Étape 1 / 3</div>
+        </div>
+
+        <div class="form-body">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert-message alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                <i class="bi bi-{% if message.tags == 'error' %}exclamation-triangle-fill{% else %}check-circle-fill{% endif %}"></i>
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post" enctype="multipart/form-data" id="multiStepForm">
+            {% csrf_token %}
+            <input type="hidden" name="current_step" id="current_step" value="{{ current_step|default:'1' }}">
+
+            <!-- ÉTAPE 1 : IDENTITÉ -->
+            <div class="step-content" id="step1">
+              <div class="row-fields">
+                <div class="field-group">
+                  <label>Prénom <span class="required">*</span></label>
+                  <input type="text" name="prenom" id="prenom" class="input-field" value="{{ form.prenom.value|default:'' }}" required>
+                  <div class="error-message" id="prenomError">Prénom requis</div>
+                </div>
+                <div class="field-group">
+                  <label>Nom <span class="required">*</span></label>
+                  <input type="text" name="nom" id="nom" class="input-field" value="{{ form.nom.value|default:'' }}" required>
+                  <div class="error-message" id="nomError">Nom requis</div>
+                </div>
+              </div>
+
+              <div class="row-fields">
+                <div class="field-group">
+                  <label>Email <span class="required">*</span></label>
+                  <input type="email" name="email" id="email" class="input-field" value="{{ form.email.value|default:'' }}" required>
+                  <div class="error-message" id="emailError">Email valide requis</div>
+                </div>
+                <div class="field-group">
+                  <label>Téléphone <span class="required">*</span></label>
+                  <input type="tel" name="telephone" id="telephone" class="input-field" value="{{ form.telephone.value|default:'' }}" maxlength="8" required>
+                  <div class="field-hint">8 chiffres (ex: 70123456)</div>
+                  <div class="error-message" id="telephoneError">8 chiffres requis</div>
+                </div>
+              </div>
+
+              <div class="row-fields">
+                <div class="field-group">
+                  <label>Genre <span class="required">*</span></label>
+                  <select name="genre" id="genre" class="form-select" required>
+                    <option value="HOMME" {% if form.genre.value == 'HOMME' %}selected{% endif %}>Homme</option>
+                    <option value="FEMME" {% if form.genre.value == 'FEMME' %}selected{% endif %}>Femme</option>
+                  </select>
+                  <div class="error-message" id="genreError">Genre requis</div>
+                </div>
+                <div class="field-group">
+                  <label>Ville <span class="required">*</span></label>
+                  <input type="text" name="ville" id="ville" class="input-field" value="{{ form.ville.value|default:'' }}" required>
+                  <div class="error-message" id="villeError">Ville requise</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ÉTAPE 2 : DOCUMENTS -->
+            <div class="step-content" id="step2">
+              <div class="field-group">
+                <label>Diplôme / Certificat <span class="required">*</span></label>
+                <input type="file" name="diplome" id="diplome" class="input-field" accept=".pdf,.jpg,.jpeg,.png" required>
+                <div class="field-hint">PDF ou image, max 10MB</div>
+                <div class="error-message" id="diplomeError">Diplôme requis</div>
+              </div>
+
+              <div class="field-group">
+                <label>CNIB / Passeport <span class="required">*</span></label>
+                <input type="file" name="cnib" id="cnib" class="input-field" accept=".pdf,.jpg,.jpeg,.png" required>
+                <div class="field-hint">PDF ou image, max 10MB</div>
+                <div class="error-message" id="cnibError">CNIB requise</div>
+              </div>
+
+              <div class="field-group">
+                <label>CV <span class="required">*</span></label>
+                <input type="file" name="cv" id="cv" class="input-field" accept=".pdf,.jpg,.jpeg,.png" required>
+                <div class="field-hint">PDF recommandé, max 10MB</div>
+                <div class="error-message" id="cvError">CV requis</div>
+              </div>
+
+              <div class="info-box">
+                <i class="bi bi-info-circle-fill"></i>
+                <strong>🔒 Confidentialité :</strong> Vos documents seront vérifiés par l'administrateur.
+              </div>
+            </div>
+
+            <!-- ÉTAPE 3 : FINALISATION -->
+            <div class="step-content" id="step3">
+              <div class="row-fields">
+                <div class="field-group">
+                  <label>Mot de passe <span class="required">*</span></label>
+                  <div class="password-wrapper">
+                    <input type="password" name="password1" id="password1" class="input-field" minlength="8" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('password1')"><i class="bi bi-eye-slash"></i></button>
+                  </div>
+                  <div class="field-hint">8 caractères minimum</div>
+                  <div class="error-message" id="pwd1Error">8 caractères minimum</div>
+                </div>
+                <div class="field-group">
+                  <label>Confirmer <span class="required">*</span></label>
+                  <div class="password-wrapper">
+                    <input type="password" name="password2" id="password2" class="input-field" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('password2')"><i class="bi bi-eye-slash"></i></button>
+                  </div>
+                  <div class="error-message" id="pwd2Error">Mots de passe différents</div>
+                </div>
+              </div>
+
+              <div class="info-box" style="background: #eef2ff; border-left-color: #0f2b4b;">
+                <i class="bi bi-shield-check"></i>
+                <strong>📋 Après inscription :</strong> Votre dossier sera analysé par notre équipe (24-48h). Une fois validé, vous pourrez ajouter vos matières et tarifs.
+              </div>
+            </div>
+
+            <div class="btn-nav">
+              <button type="button" class="btn-prev" id="prevBtn" style="display: none;">← Précédent</button>
+              <button type="button" class="btn-next" id="nextBtn">Suivant →</button>
+              <button type="submit" class="btn-submit" id="submitBtn" style="display: none;">📤 Soumettre ma candidature</button>
+            </div>
+          </form>
+
+          <p class="text-center mt-4 mb-0">
+            <a href="{% url 'login' %}" class="text-link">🔑 Déjà un compte ? Se connecter</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Éléments
+  let currentStep = parseInt(document.getElementById('current_step').value) || 1;
+  const totalSteps = 3;
+  const steps = {1: 'step1', 2: 'step2', 3: 'step3'};
+  const indicators = {1: 'step1-indicator', 2: 'step2-indicator', 3: 'step3-indicator'};
+
+  // Validation d'un champ
+  function validate(el, isValid) {
+    const err = document.getElementById(el.id + 'Error');
+    if (isValid) {
+      el.classList.remove('error');
+      el.classList.add('valid');
+      if (err) err.style.display = 'none';
+    } else if (el.value || (el.files && el.files.length)) {
+      el.classList.remove('valid');
+      el.classList.add('error');
+      if (err) err.style.display = 'flex';
+    }
+    return isValid;
+  }
+
+  // Éléments DOM
+  const prenom = document.getElementById('prenom');
+  const nom = document.getElementById('nom');
+  const email = document.getElementById('email');
+  const telephone = document.getElementById('telephone');
+  const genre = document.getElementById('genre');
+  const ville = document.getElementById('ville');
+  const diplome = document.getElementById('diplome');
+  const cnib = document.getElementById('cnib');
+  const cv = document.getElementById('cv');
+  const pwd1 = document.getElementById('password1');
+  const pwd2 = document.getElementById('password2');
+
+  // Vérifications
+  function checkPrenom() { validate(prenom, prenom.value.trim() !== ''); }
+  function checkNom() { validate(nom, nom.value.trim() !== ''); }
+  function checkEmail() { validate(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)); }
+  function checkTelephone() { validate(telephone, /^\d{8}$/.test(telephone.value)); }
+  function checkGenre() { validate(genre, genre.value !== ''); }
+  function checkVille() { validate(ville, ville.value.trim() !== ''); }
+  function checkDiplome() { validate(diplome, diplome.files && diplome.files.length > 0); }
+  function checkCnib() { validate(cnib, cnib.files && cnib.files.length > 0); }
+  function checkCv() { validate(cv, cv.files && cv.files.length > 0); }
+  function checkPassword1() { validate(pwd1, pwd1.value.length >= 8); }
+  function checkPassword2() { validate(pwd2, pwd2.value && pwd1.value === pwd2.value); }
+
+  // Vérification email en temps réel (AJAX)
+  function checkEmailExists() {
+    const emailValue = email.value.trim();
+    if (emailValue && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      fetch(`/utilisateurs/verifier-email/?email=${encodeURIComponent(emailValue)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.existe) {
+            const err = document.getElementById('emailError');
+            err.textContent = '❌ Cet email est déjà utilisé';
+            err.style.display = 'flex';
+            email.classList.add('error');
+            email.classList.remove('valid');
+          } else {
+            const err = document.getElementById('emailError');
+            err.textContent = 'Email valide requis';
+            err.style.display = 'none';
+            email.classList.remove('error');
+            email.classList.add('valid');
+          }
+        });
+    }
+  }
+
+  // Attacher événements
+  if (prenom) prenom.addEventListener('input', checkPrenom);
+  if (nom) nom.addEventListener('input', checkNom);
+  if (email) {
+    email.addEventListener('input', checkEmail);
+    email.addEventListener('blur', checkEmailExists);
+  }
+  if (telephone) telephone.addEventListener('input', checkTelephone);
+  if (genre) genre.addEventListener('change', checkGenre);
+  if (ville) ville.addEventListener('input', checkVille);
+  if (diplome) diplome.addEventListener('change', checkDiplome);
+  if (cnib) cnib.addEventListener('change', checkCnib);
+  if (cv) cv.addEventListener('change', checkCv);
+  if (pwd1) pwd1.addEventListener('input', checkPassword1);
+  if (pwd2) pwd2.addEventListener('input', checkPassword2);
+
+  // Formatage téléphone
+  if (telephone) {
+    telephone.addEventListener('input', () => {
+      telephone.value = telephone.value.replace(/\D/g, '').slice(0, 8);
+    });
+  }
+
+  // Gestion des étapes
+  function updateSteps() {
+    for (let i = 1; i <= totalSteps; i++) {
+      const stepEl = document.getElementById(steps[i]);
+      const indicatorEl = document.getElementById(indicators[i]);
+      if (stepEl) stepEl.classList.remove('active');
+      if (indicatorEl) {
+        indicatorEl.classList.remove('active', 'completed');
+      }
+    }
+    const currentStepEl = document.getElementById(steps[currentStep]);
+    const currentIndicator = document.getElementById(indicators[currentStep]);
+    if (currentStepEl) currentStepEl.classList.add('active');
+    if (currentIndicator) currentIndicator.classList.add('active');
+
+    for (let i = 1; i < currentStep; i++) {
+      const completedIndicator = document.getElementById(indicators[i]);
+      if (completedIndicator) completedIndicator.classList.add('completed');
+    }
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const stepCounter = document.getElementById('step-counter');
+
+    if (prevBtn) prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
+    if (nextBtn) nextBtn.style.display = currentStep === totalSteps ? 'none' : 'block';
+    if (submitBtn) submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
+    if (stepCounter) stepCounter.textContent = `Étape ${currentStep} / ${totalSteps}`;
+
+    const currentStepInput = document.getElementById('current_step');
+    if (currentStepInput) currentStepInput.value = currentStep;
+  }
+
+  function validateStep(step) {
+    if (step === 1) {
+      checkPrenom(); checkNom(); checkEmail(); checkTelephone(); checkGenre(); checkVille();
+      return prenom && prenom.classList.contains('valid') && nom && nom.classList.contains('valid') &&
+             email && email.classList.contains('valid') && telephone && telephone.classList.contains('valid') &&
+             genre && genre.classList.contains('valid') && ville && ville.classList.contains('valid');
+    }
+    if (step === 2) {
+      checkDiplome(); checkCnib(); checkCv();
+      return diplome && diplome.classList.contains('valid') && cnib && cnib.classList.contains('valid') &&
+             cv && cv.classList.contains('valid');
+    }
+    if (step === 3) {
+      checkPassword1(); checkPassword2();
+      return pwd1 && pwd1.classList.contains('valid') && pwd2 && pwd2.classList.contains('valid');
+    }
+    return false;
+  }
+
+  const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (validateStep(currentStep) && currentStep < totalSteps) {
+        currentStep++;
+        updateSteps();
+      } else {
+        alert('Veuillez remplir tous les champs obligatoires correctement');
+      }
+    });
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentStep > 1) {
+        currentStep--;
+        updateSteps();
+      }
+    });
+  }
+
+  const form = document.getElementById('multiStepForm');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      if (!validateStep(3)) {
+        e.preventDefault();
+        alert('Veuillez corriger les erreurs avant de soumettre');
+      }
+    });
+  }
+
+  function togglePassword(id) {
+    const f = document.getElementById(id);
+    if (f) {
+      const icon = f.parentElement.querySelector('.password-toggle i');
+      f.type = f.type === 'password' ? 'text' : 'password';
+      if (icon) {
+        icon.classList.toggle('bi-eye');
+        icon.classList.toggle('bi-eye-slash');
+      }
+    }
+  }
+
+  // Initialisation
+  updateSteps();
+  if (prenom) checkPrenom(); if (nom) checkNom(); if (email) checkEmail();
+  if (telephone) checkTelephone(); if (genre) checkGenre(); if (ville) checkVille();
+  if (diplome) checkDiplome(); if (cnib) checkCnib(); if (cv) checkCv();
+  if (pwd1) checkPassword1(); if (pwd2) checkPassword2();
+</script>
+{% endblock %}

@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ encadreur.utilisateur.get_full_name }} - Encadreur Zãmsɛ{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #0f2b4b;
+    --primary-light: #1e3a5f;
+    --accent: #e3b23c;
+    --accent-dark: #c49a1f;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-500: #64748b;
+    --gray-800: #1e293b;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+  }
+
+  body { background: var(--gray-50); font-family: 'Inter', sans-serif; }
+
+  .profile-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    padding: 3rem 0 5rem 0;
+    margin-top: 70px;
+  }
+
+  .profile-main {
+    max-width: 1100px;
+    margin: -3rem auto 0;
+    background: white;
+    border-radius: 28px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .profile-main-inner { padding: 1.8rem; }
+
+  .profile-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: var(--shadow-md);
+  }
+
+  .avatar-placeholder {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: white;
+    border: 4px solid white;
+  }
+
+  .profile-name { font-size: 1.6rem; font-weight: 800; color: var(--gray-800); margin-bottom: 0.25rem; }
+  .badge-verified { background: #eef2ff; color: var(--primary); padding: 0.2rem 0.6rem; border-radius: 30px; font-size: 0.65rem; font-weight: 600; }
+  .profile-location { color: var(--gray-500); font-size: 0.85rem; margin-top: 0.25rem; }
+  .stars { color: #f5b042; font-size: 0.9rem; }
+
+  .btn-outline {
+    border: 1.5px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    padding: 0.5rem 1.2rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    width: 100%;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+  }
+  .btn-outline:hover { background: var(--accent); color: var(--primary); }
+
+  .btn-primary-custom {
+    background: var(--accent);
+    color: var(--primary);
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    width: 100%;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+  }
+  .btn-primary-custom:hover { background: var(--accent-dark); transform: translateY(-1px); }
+
+  .stats-row {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--gray-200);
+    margin-top: 1rem;
+  }
+  .stat-number { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+  .stat-label { font-size: 0.7rem; color: var(--gray-500); }
+
+  .info-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.2rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid var(--gray-200);
+  }
+  .info-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--gray-800); }
+  .info-card h3 i { color: var(--accent); }
+
+  .matiere-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .matiere-price { font-weight: 700; color: var(--accent-dark); }
+
+  .avis-item {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .avis-author { font-weight: 600; font-size: 0.85rem; }
+
+  .modal-custom .modal-content { border-radius: 24px; border: none; }
+
+  @media (max-width: 768px) {
+    .profile-main-inner { padding: 1rem; }
+    .profile-avatar, .avatar-placeholder { width: 80px; height: 80px; font-size: 1.8rem; }
+    .profile-name { font-size: 1.2rem; }
+    .stats-row { gap: 1rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-banner"></div>
+
+<div class="container" style="max-width: 1100px;">
+  <div class="profile-main">
+    <div class="profile-main-inner">
+      <div class="row align-items-start">
+        <div class="col-auto">
+          {% if encadreur.utilisateur.photo_profil %}
+            <img src="{{ encadreur.utilisateur.photo_profil.url }}" class="profile-avatar">
+          {% else %}
+            <div class="avatar-placeholder">{{ encadreur.utilisateur.get_full_name|make_list|first|upper }}</div>
+          {% endif %}
+        </div>
+        <div class="col">
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <h1 class="profile-name">{{ encadreur.utilisateur.get_full_name }}</h1>
+            {% if encadreur.utilisateur.est_verifie %}
+              <span class="badge-verified"><i class="bi bi-check-circle-fill"></i> Vérifié</span>
+            {% endif %}
+          </div>
+          <div class="profile-location">
+            <i class="bi bi-geo-alt-fill"></i> {{ encadreur.ville }}{% if encadreur.quartier %} · {{ encadreur.quartier }}{% endif %}
+          </div>
+          <div class="stars mt-1">
+            {% with note=encadreur.note_moyenne|default:0 %}
+              {% for i in "12345"|make_list %}
+                {% if forloop.counter <= note %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+              {% endfor %}
+              <span class="text-muted ms-1">{{ encadreur.note_moyenne|default:"0"|floatformat:1 }} ({{ encadreur.nb_evaluations|default:"0" }} avis)</span>
+            {% endwith %}
+          </div>
+          <div class="stats-row">
+            <div><span class="stat-number">{{ specialisations|length }}</span><div class="stat-label">Matières</div></div>
+            <div><span class="stat-number">{{ encadreur.nb_evaluations|default:"0" }}</span><div class="stat-label">Avis</div></div>
+            <div><span class="stat-number">{{ encadreur.date_inscription|date:"Y" }}</span><div class="stat-label">Membre</div></div>
+          </div>
+        </div>
+        <div class="col-auto text-end" style="min-width: 180px;">
+          {% if user.is_authenticated and user.role == 'APPRENANT' %}
+            <form method="post" action="{% url 'creer_demande' encadreur.id %}" class="mb-2">
+              {% csrf_token %}
+              <input type="hidden" name="matiere" value="{{ specialisations.first.matiere.id|default:'' }}">
+              <input type="hidden" name="description" value="Demande de cours">
+              <input type="hidden" name="lieu" value="DOMICILE_APPRENANT">
+              <button type="submit" class="btn-primary-custom">
+                <i class="bi bi-chat-text me-2"></i>Demander un cours
+              </button>
+            </form>
+            <a href="{% url 'envoyer_message_encadreur' encadreur.id %}" class="btn-outline mb-2">
+              <i class="bi bi-envelope me-2"></i>Envoyer un message
+            </a>
+            <button class="btn-outline w-100" data-bs-toggle="modal" data-bs-target="#avisModal">
+              <i class="bi bi-star me-2"></i>Donner mon avis
+            </button>
+          {% else %}
+            <button class="btn-primary-custom mb-2 w-100" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">
+              <i class="bi bi-chat-text me-2"></i>Demander un cours
+            </button>
+            <button class="btn-outline mb-2 w-100" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">
+              <i class="bi bi-envelope me-2"></i>Envoyer un message
+            </button>
+            <button class="btn-outline w-100" onclick="window.location.href='{% url 'login' %}?next={{ request.path }}'">
+              <i class="bi bi-star me-2"></i>Donner mon avis
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4 g-4">
+    <div class="col-lg-7">
+      <div class="info-card">
+        <h3><i class="bi bi-person-badge"></i> À propos</h3>
+        <p class="mb-3">{{ encadreur.presentation|default:"Aucune présentation." }}</p>
+        {% if encadreur.experience %}
+          <div class="mt-3 pt-2 border-top">
+            <div class="d-flex gap-2 mb-2"><i class="bi bi-briefcase text-muted"></i><span class="fw-semibold">Expérience</span></div>
+            <p class="small text-muted">{{ encadreur.experience }}</p>
+          </div>
+        {% endif %}
+        {% if encadreur.diplome %}
+          <div class="mt-2 pt-2">
+            <div class="d-flex gap-2 mb-2"><i class="bi bi-award text-muted"></i><span class="fw-semibold">Diplôme</span></div>
+            <p class="small text-muted">{{ encadreur.diplome }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="info-card">
+        <h3><i class="bi bi-book"></i> Matières enseignées</h3>
+        {% if specialisations %}
+          {% for spec in specialisations %}
+            <div class="matiere-item">
+              <div>
+                <div class="fw-semibold">{{ spec.matiere.nom }}</div>
+                <div class="small text-muted">
+                  <i class="bi bi-mortarboard"></i> {{ spec.classe.nom|default:"Tous niveaux" }}
+                  · {% if spec.type_cours == 'DOMICILE' %}🏠 À domicile{% else %}👥 Cours groupés{% endif %}
+                </div>
+              </div>
+              <div class="matiere-price">{{ spec.tarif }} FCFA<span class="small text-muted">/h</span></div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted text-center py-3">Aucune matière renseignée.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="info-card">
+        <h3><i class="bi bi-star"></i> Avis</h3>
+        {% if avis %}
+          {% for a in avis|slice:":3" %}
+            <div class="avis-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="avis-author">{{ a.apprenant.utilisateur.get_full_name|default:a.apprenant.utilisateur.username }}</div>
+                <div class="small text-muted">{{ a.date_creation|date:"d/m/Y" }}</div>
+              </div>
+              <div class="stars my-1">
+                {% for i in "12345"|make_list %}
+                  {% if forloop.counter <= a.note %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                {% endfor %}
+              </div>
+              <div class="small text-muted">{{ a.commentaire|default:"Aucun commentaire."|truncatechars:100 }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted text-center py-3">Aucun avis pour le moment.</p>
+        {% endif %}
+      </div>
+
+      <div class="info-card">
+        <h3><i class="bi bi-info-circle"></i> Informations</h3>
+        <div class="d-flex justify-content-between py-2">
+          <span class="text-muted"><i class="bi bi-calendar3 me-2"></i>Membre depuis</span>
+          <span class="fw-semibold">{{ encadreur.date_inscription|date:"F Y" }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-2">
+          <span class="text-muted"><i class="bi bi-envelope me-2"></i>Contact</span>
+          <span class="fw-semibold">Connectez-vous pour voir</span>
+        </div>
+        {% if encadreur.se_deplace %}
+          <div class="d-flex justify-content-between py-2">
+            <span class="text-muted"><i class="bi bi-car-front me-2"></i>Se déplace</span>
+            <span class="fw-semibold">Jusqu'à {{ encadreur.rayon_km }} km</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Avis -->
+{% if user.is_authenticated and user.role == 'APPRENANT' %}
+<div class="modal fade modal-custom" id="avisModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pt-4 px-4">
+        <h5 class="fw-bold">Donner mon avis</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'donner_avis' encadreur.id %}">
+        {% csrf_token %}
+        <div class="modal-body px-4">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Note</label>
+            <div class="d-flex gap-2" id="noteSelection">
+              <i class="bi bi-star fs-3 text-muted" data-note="1" style="cursor: pointer;"></i>
+              <i class="bi bi-star fs-3 text-muted" data-note="2" style="cursor: pointer;"></i>
+              <i class="bi bi-star fs-3 text-muted" data-note="3" style="cursor: pointer;"></i>
+              <i class="bi bi-star fs-3 text-muted" data-note="4" style="cursor: pointer;"></i>
+              <i class="bi bi-star fs-3 text-muted" data-note="5" style="cursor: pointer;"></i>
+            </div>
+            <input type="hidden" name="note" id="noteValue" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Commentaire</label>
+            <textarea name="commentaire" class="form-control" rows="3" placeholder="Partagez votre expérience..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pb-4 px-4">
+          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4">Publier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Sélection de la note
+  const stars = document.querySelectorAll('#noteSelection i');
+  const noteInput = document.getElementById('noteValue');
+
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      const note = parseInt(this.dataset.note);
+      noteInput.value = note;
+      stars.forEach((s, index) => {
+        if (index < note) {
+          s.classList.remove('bi-star');
+          s.classList.add('bi-star-fill');
+          s.style.color = '#f5b042';
+        } else {
+          s.classList.remove('bi-star-fill');
+          s.classList.add('bi-star');
+          s.style.color = '#cbd5e1';
+        }
+      });
+    });
+  });
+
+  // Validation avant soumission
+  document.querySelector('#avisModal form').addEventListener('submit', function(e) {
+    const noteValue = document.getElementById('noteValue').value;
+    if (!noteValue) {
+      e.preventDefault();
+      alert('Veuillez sélectionner une note (1 à 5 étoiles)');
+      return false;
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}

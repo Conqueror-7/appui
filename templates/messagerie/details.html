@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Message - Zãmsɛ{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'boite_reception' %}" class="btn btn-outline-secondary rounded-pill">
+          <i class="bi bi-arrow-left me-2"></i>Retour
+        </a>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+          <div class="d-flex align-items-center">
+            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+              <i class="bi bi-person-circle fs-3 text-secondary"></i>
+            </div>
+            <div class="ms-3">
+              <h5 class="fw-bold mb-0">{{ message.expediteur.get_full_name|default:message.expediteur.username }}</h5>
+              <small class="text-muted">{{ message.date_envoi|date:"d/m/Y H:i" }}</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          <p class="mb-0" style="line-height: 1.6;">{{ message.contenu|linebreaks }}</p>
+        </div>
+      </div>
+
+      <!-- Formulaire de réponse -->
+      <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+          <h5 class="fw-bold mb-0">Répondre</h5>
+        </div>
+        <div class="card-body p-4">
+          <form method="post" action="{% url 'envoyer_message' message.expediteur.id %}">
+            {% csrf_token %}
+            <textarea name="contenu" class="form-control rounded-3" rows="4" placeholder="Votre réponse..." required></textarea>
+            <div class="mt-3 text-end">
+              <button type="submit" class="btn btn-primary rounded-pill px-4">
+                <i class="bi bi-send me-2"></i>Envoyer
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ajouter une matière - Zãmsɛ{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <i class="bi bi-plus-circle fs-1 text-primary"></i>
+            <h2 class="fw-bold mt-2">Ajouter une matière</h2>
+            <p class="text-muted">Définissez les matières que vous enseignez</p>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Matière</label>
+              <select name="matiere" class="form-select rounded-3" required>
+                <option value="">Sélectionner une matière</option>
+                {% for m in matieres %}
+                <option value="{{ m.id }}">{{ m.nom }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Classe / Niveau</label>
+              <select name="classe" class="form-select rounded-3">
+                <option value="">Tous niveaux</option>
+                {% for c in classes %}
+                <option value="{{ c.id }}">{{ c.nom }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text text-muted">Laissez vide pour tous les niveaux</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Tarif (FCFA / heure)</label>
+              <input type="number" name="tarif" class="form-control rounded-3" placeholder="Ex: 5000" required min="0" step="500">
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Type de cours</label>
+              <select name="type_cours" class="form-select rounded-3">
+                <option value="DOMICILE">🏠 À domicile (je me déplace)</option>
+                <option value="GROUPE">👥 Cours groupés (plusieurs élèves)</option>
+              </select>
+            </div>
+
+            <div class="d-flex gap-2">
+              <a href="{% url 'gerer_specialisations' %}" class="btn btn-light rounded-pill px-4 flex-grow-1">Annuler</a>
+              <button type="submit" class="btn btn-primary rounded-pill px-4 flex-grow-1">Ajouter</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
